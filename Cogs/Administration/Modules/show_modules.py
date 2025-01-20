@@ -1,5 +1,6 @@
 from cantinaUtils.verify_login import verify_login
 from flask import redirect, url_for, request, render_template
+from datetime import datetime
 
 
 def show_modules_cogs(database):
@@ -14,7 +15,7 @@ def show_modules_cogs(database):
         local_user_theme = database.select('''SELECT theme FROM cantina_administration.user WHERE token= %s''',
                                            (request.cookies.get('token')), 1)
 
-        if not user_permission[23]:  # Si l'utilisateur n'as pas la permission, redirection vers la page d'accueil
+        if not user_permission[23] and not user_permission[32]:  # Si l'utilisateur n'as pas la permission, redirection vers la page d'accueil
             return redirect(url_for('home'))
 
         if request.method == 'POST':
@@ -28,9 +29,19 @@ def show_modules_cogs(database):
                 selected_module_info = database.select('''SELECT * FROM cantina_administration.modules WHERE name = %s''',
                                               (request.args.get('module_name')), 1)
 
+                time_diff = datetime.now() - datetime.fromtimestamp(selected_module_info[7])
+
+                date = [datetime.fromtimestamp(selected_module_info[7]).strftime("%H:%M:%S - %d/%m/%Y"),
+                        [int(time_diff.days),
+                         int(time_diff.seconds // 3600),
+                         int((time_diff.seconds% 3600) // 60),
+                         int(time_diff.seconds % 60)
+                         ]
+                        ]
+
                 return render_template('Administration/show_one_modules.html',
                                        selected_module_info=selected_module_info, modules_info=modules_info,
-                                       user_permission=user_permission, local_user_theme=local_user_theme)
+                                       user_permission=user_permission, local_user_theme=local_user_theme, date=date)
             else:
                 modules_info = database.select('''SELECT * FROM cantina_administration.modules''', None)
             return render_template('Administration/show_modules.html', modules_info=modules_info,

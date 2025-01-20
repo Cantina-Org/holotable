@@ -1,4 +1,4 @@
-from os import path
+from os import path, remove
 from Utils.verify_login import verify_login
 from flask import request, render_template, redirect, url_for
 from werkzeug.exceptions import BadRequestKeyError
@@ -22,7 +22,7 @@ def show_user_cogs(database, upload_path):
             WHERE user_token = %s''', (request.cookies.get('token')), 1)
 
             # Si l'utilisateur n'a pas les permissions, redirection vers la page d'accueil
-            if not local_user_permission[9]:
+            if not local_user_permission[9] and not  local_user_permission[32]:
                 return redirect(url_for('home'))
 
             # Si l'utilisateur souhaite voir un utilisateur en particulier
@@ -32,9 +32,6 @@ def show_user_cogs(database, upload_path):
                                             (request.args.get('user_token')), number_of_data=1)
                 selected_user_permission = database.select_dict('''SELECT * FROM cantina_administration.permission WHERE 
                 user_token = %s''', (request.args.get('user_token')), number_of_data=1)
-
-                print(type(selected_user_data))
-                print(type(selected_user_permission))
 
                 return render_template('Administration/show_user.html',
                                        multiple_user_info=None,
@@ -108,6 +105,12 @@ def show_user_cogs(database, upload_path):
             if 'profile_picture' in request.files:
                 profile_picture = request.files['profile_picture']  # Récupération de la photo
                 if profile_picture.filename != '':
+                    # Supression des autres photos de profile
+                    for extension in ['png', 'jpg', 'jpeg', 'heic']:
+                        filepath = path.join(upload_path, f"{request.form['token']}.{extension}")
+                        if path.exists(filepath):
+                            remove(filepath)
+
                     # Sauvegarde de la photo
                     profile_picture.save(path.join(upload_path, secure_filename(request.form['token']) + '.' +
                                                    profile_picture.filename.rsplit('.', 1)[1].lower()))

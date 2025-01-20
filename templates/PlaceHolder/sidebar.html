@@ -4,8 +4,9 @@
         <div class="flex flex-wrap flex-col items-center p-2">
             <div class="flex flex-wrap flex-col items-center p-2">
                 <div class="avatar rounded-full w-20 h-20">
-                    <img src="{{ url_for('static', filename='ProfilePicture/'+request.cookies.get('token')+'.png') }}"
-                         class="rounded-full w-20 h-20 object-cover overflow-hidden" alt="L'image n'existe pas">
+                    <img src="{{ url_for('get_profile_picture')}}"
+                     class="rounded-full w-20 h-20 object-cover overflow-hidden"
+                     alt="L'image n'existe pas">
                 </div>
                 <p class="font-bold text-wrap">Cantina - Olympe</p>
             </div>
@@ -32,9 +33,9 @@
                 </a>
             </li>
         </ul>
-        {% if user_permission[9] or user_permission[14] or user_permission[15] or user_permission[16] or user_permission[17] or user_permission[18] or user_permission[23] or user_permission[31] %}
+        {% if user_permission[9] or user_permission[14] or user_permission[15] or user_permission[16] or user_permission[17] or user_permission[18] or user_permission[23] or user_permission[31] or user_permission[32]%}
             <ul class="menu pt-5 mt-5 space-y-2 border-primary border-t">
-                {% if user_permission[9] %}
+                {% if user_permission[9] or user_permission[32] %}
                     <li>
                         <a href="{{ url_for('show_user') }}" class="flex items-center p-2 {% if request.path == url_for('show_user') %}active{% endif %}">
                             <svg aria-hidden="true" class="w-6 h-6 transition duration-75" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -47,7 +48,7 @@
                         </a>
                     </li>
                 {% endif %}
-                {% if user_permission[14] or user_permission[15] or user_permission[16] or user_permission[17] or user_permission[18]  %}
+                {% if user_permission[14] or user_permission[15] or user_permission[16] or user_permission[17] or user_permission[18] or user_permission[32] %}
                     <li>
                         <a href="{{ url_for('global_permission') }}" class="flex items-center p-2 {% if request.path == url_for('global_permission') %}active{% endif %}">
                             <svg aria-hidden="true" class="w-6 h-6 transition duration-75" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -60,7 +61,7 @@
                         </a>
                     </li>
                 {% endif %}
-                {% if user_permission[23]  %}
+                {% if user_permission[23] or user_permission[32] %}
                     <li>
                         <a href="{{ url_for('show_modules') }}" class="flex items-center p-2 {% if request.path == url_for('show_modules') %}active{% endif %}">
                             <svg aria-hidden="true" class="w-6 h-6 transition duration-75" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -73,7 +74,7 @@
                         </a>
                    </li>
                 {% endif %}
-                {% if user_permission[31]  %}
+                {% if user_permission[31] or user_permission[32] %}
                     <li>
                         <a href="{{ url_for('smtp_config') }}" class="flex items-center p-2 {% if request.path == url_for('smtp_config') %}active{% endif %}">
                             <svg aria-hidden="true" class="w-6 h-6 transition duration-75" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">

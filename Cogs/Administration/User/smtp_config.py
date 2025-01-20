@@ -6,7 +6,7 @@ def smtp_config_cogs(database):
     if verify_login(database) and verify_login(database) != 'desactivated':
         user_permission = database.select('''SELECT * from cantina_administration.permission WHERE user_token = %s''',
                                           (request.cookies.get('token')), 1)
-        if not user_permission[31]:  # Si l'utilisateur n'as pas la permission, redirection vers la page d'accueil
+        if not user_permission[31] and not user_permission[32]:  # Si l'utilisateur n'as pas la permission, redirection vers la page d'accueil
             return redirect(url_for('home'))
 
         # On récupère les modules afin de pouvoir faire une redirection sur la page via la sidebar
@@ -18,7 +18,6 @@ def smtp_config_cogs(database):
 
         if request.method == 'POST':
             for element in request.form:
-                print(element)
                 database.exec('''UPDATE cantina_administration.config SET content = %s
                 WHERE name = %s''', (request.form[element], element))
 

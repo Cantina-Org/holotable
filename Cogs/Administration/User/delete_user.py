@@ -6,8 +6,8 @@ def delete_user_cogs(database):
     # Vérification de si l'utilisateur est bien connecté et n'a pas un compte désactivé
     if verify_login(database) and verify_login(database) != 'desactivated':
         # Si l'utilisateur n'a pas les permissions, redirection vers la page d'accueil
-        if not database.select("""SELECT delete_account FROM cantina_administration.permission 
-        WHERE user_token = %s""", (request.cookies.get('token')), 1)[0]:
+        user_permission = database.select("""SELECT delete_account FROM cantina_administration.permission WHERE user_token = %s""", (request.cookies.get('token')), 1)
+        if not user_permission[0] and not user_permission[1]:
             return redirect(url_for('show_user'))
 
         # Suppressions des permissions et des données de l'utilisateur.

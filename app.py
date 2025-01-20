@@ -4,9 +4,12 @@ from cantinaUtils import Database
 from os import path, getcwd
 from json import load
 
+from Utils.verify_maintenance import verify_maintenance
+
 from Cogs.SSO.login import sso_login_cogs
 from Cogs.SSO.logout import sso_logout_cogs
 from Cogs.User.home import user_home_cogs
+from Cogs.User.get_profile_picture import get_profile_picture_cogs
 from Cogs.User.user_space import user_space_cogs
 from Cogs.User.doublefa_add import doubleFA_add_cogs
 from Cogs.User.email_verif import email_verif_cogs
@@ -17,8 +20,13 @@ from Cogs.Administration.User.add_user import add_user_cogs
 from Cogs.Administration.User.edit_user_permission import edit_user_permission_cogs
 from Cogs.Administration.User.global_permission import global_permission_cogs
 from Cogs.Administration.User.smtp_config import smtp_config_cogs
+from Cogs.Administration.User.smtp_test import smtp_test_cogs
 from Cogs.Administration.Modules.show_modules import show_modules_cogs
+from Cogs.Administration.Modules.maintenance import maintenance_cogs
 from Cogs.Administration.Modules.add_modules import add_modules_cogs
+
+from Cogs.Socket.heart_beat_cogs import heart_beat_cogs
+from Cogs.Socket.ping_server_socket_cogs import ping_server_socket_cogs
 
 file_path = path.abspath(path.join(getcwd(), "config.json"))  # Trouver le chemin complet du fichier config.json
 
@@ -27,9 +35,9 @@ with open(file_path, 'r') as file:
     config_data = load(file)  # Ouverture du fichier config.json
 
 app = Flask(__name__)  # Création de l'application Flask
-socketio = SocketIO(app)  # Lien entre l'application Flaks et le WebSocket
+app.config['SECRET_KEY'] = config_data['modules'][0]['secret_key']
+socketio = SocketIO(app, cors_allowed_origins="*")  # Lien entre l'application Flaks et le WebSocket
 app.config['UPLOAD_FOLDER'] = path.abspath(path.join(getcwd(), "static/ProfilePicture/"))
-# app.config['SERVER_NAME'] = config_data['modules'][0]['global_domain']
 
 database = Database.DataBase(
     user=config_data['database'][0]['username'],
@@ -49,7 +57,7 @@ database.exec("""CREATE TABLE IF NOT EXISTS cantina_administration.config(id INT
 name TEXT, content TEXT)""", None)
 database.exec("""CREATE TABLE IF NOT EXISTS cantina_administration.modules(id INT PRIMARY KEY AUTO_INCREMENT, 
 token TEXT, name TEXT, fqdn TEXT, maintenance BOOL default FALSE, status INTEGER DEFAULT 0, 
-socket_url TEXT DEFAULT '/socket/')""", None)
+socket_url TEXT DEFAULT '/socket/', last_heartbeat INT)""", None)
 database.exec("""CREATE TABLE IF NOT EXISTS cantina_administration.permission(id INT PRIMARY KEY AUTO_INCREMENT,
 user_token TEXT NOT NULL, show_log BOOL DEFAULT FALSE, edit_username BOOL DEFAULT FALSE, edit_email BOOL DEFAULT FALSE, 
 edit_password BOOL DEFAULT FALSE, edit_profile_picture BOOL DEFAULT FALSE, edit_A2F BOOL DEFAULT FALSE, 
@@ -61,14 +69,24 @@ allow_edit_profile_picture BOOL DEFAULT FALSE, allow_edit_A2F BOOL DEFAULT FALSE
 delete_account BOOL DEFAULT FALSE, desactivate_account BOOL DEFAULT FALSE, edit_permission BOOL DEFAULT FALSE, 
 show_all_modules BOOL DEFAULT FALSE, on_off_modules BOOL DEFAULT FALSE, on_off_maintenance BOOL DEFAULT FALSE, 
 delete_modules BOOL DEFAULT FALSE, add_modules BOOL DEFAULT FALSE, edit_name_module BOOL DEFAULT FALSE, 
-edit_url_module BOOL DEFAULT FALSE, edit_socket_url BOOL DEFAULT FALSE, edit_smtp_config BOOL DEFAULT FALSE)""", None)
+edit_url_module BOOL DEFAULT FALSE, edit_socket_url BOOL DEFAULT FALSE, edit_smtp_config BOOL DEFAULT FALSE, admin BOOL DEFAULT FALSE)""", None)
 database.exec("""CREATE TABLE IF NOT EXISTS cantina_administration.log(id INT PRIMARY KEY AUTO_INCREMENT, 
     action_name TEXT, user_ip TEXT, user_token TEXT, details TEXT, log_level INT)""", None)
+
+# Vérifiacation du mode de maintenance
+@app.before_request
+def before_req():
+    return verify_maintenance(database, config_data['modules'][0]['maintenance'])
 
 
 @app.route('/', methods=['GET'])
 def home():
     return user_home_cogs(database)
+
+
+@app.route('/user_space/get_profile_picture')
+def get_profile_picture():
+    return get_profile_picture_cogs(database, app.config['UPLOAD_FOLDER'])
 
 
 @app.route('/user_space/', methods=['GET', 'POST'])
@@ -131,9 +149,19 @@ def add_modules():
     return add_modules_cogs(database)
 
 
+@app.route('/admin/modules/maintenance/', methods=['POST'])
+def maintenance():
+    return maintenance_cogs(database)
+
+
 @app.route('/admin/smtp/config/', methods=['POST', 'GET'])
 def smtp_config():
     return smtp_config_cogs(database)
+
+
+@app.route('/admin/smtp/config/test', methods=['POST'])
+def smtp_test():
+    return smtp_test_cogs(database)
 
 
 """
@@ -149,6 +177,18 @@ def sso_login(error=0):
 def sso_logout():
     return sso_logout_cogs()
 
+"""
+    Partie Socket
+"""
+
+@socketio.on('heartbeat')
+def heart_beat(data):
+    return heart_beat_cogs(data, database)
+
+@socketio.on('ping_server')
+def ping_server_socket():
+    return ping_server_socket_cogs()
+
 
 if __name__ == '__main__':
     socketio.run(app,
@@ -156,3 +196,4 @@ if __name__ == '__main__':
                  debug=config_data["modules"][0]["debug_mode"],
                  port=config_data["modules"][0]["port"]
                  )
+

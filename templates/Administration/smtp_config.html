@@ -37,11 +37,17 @@
                     <div class="text-sm opacity-70 mb-1">Contenue du mail de verification :</div>
                     <div class="font-semibold">{{ smtp_info[5][2] }}</div>
                 </div>
-                {% if user_permission[31] %}
+                {% if user_permission[31] or user_permission[32] %}
                     <div class="card-actions justify-end">
                         <button class="btn btn-primary" onclick="showSMTPEditForm()">Modifier</button>
                     </div>
                 {% endif %}
+                <form method="post" action="{{ url_for('smtp_test') }}">
+                    <div class="card-actions justify-end">
+                        <button class="btn btn-primary">Envoyer un email de test</button>
+                    </div>
+                </form>
+
             </div>
         </div>
         <div class="card bg-base-100 shadow-xl" id="smtp-form" hidden>
@@ -83,7 +89,7 @@
                         <div class="text-sm opacity-70 mb-1">Sujet de mail de vérification :</div>
                         <div class="font-semibold">
                             <label>
-                                <textarea class="textarea textarea-bordered" name="{{ smtp_info[4][1] }}">{{ smtp_info[4][2] }}</textarea>
+                                <textarea class="textarea textarea-bordered" name="{{ smtp_info[4][1] }}">{{ smtp_info[4][2] | safe }}</textarea>
                             </label>
                         </div>
                     </div>
@@ -91,11 +97,11 @@
                         <div class="text-sm opacity-70 mb-1">Contenue du mail de verification :</div>
                         <div class="font-semibold">
                             <label>
-                                <textarea class="textarea textarea-bordered" name="{{ smtp_info[5][1] }}">{{ smtp_info[5][2].replace('\n','&#13;&#10;') }}</textarea>
+                                <textarea class="textarea textarea-bordered" name="{{ smtp_info[5][1] }}">{{ smtp_info[5][2] }}</textarea>
                             </label>
                         </div>
                     </div>
-                    {% if user_permission[31] %}
+                    {% if user_permission[31] or user_permission[32] %}
                         <div class="card-actions justify-end">
                             <button class="btn btn-primary" onclick="showSMTPEditForm()">Modifier</button>
                         </div>

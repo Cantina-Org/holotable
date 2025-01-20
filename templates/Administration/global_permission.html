@@ -43,7 +43,7 @@
                 <form method="post">
                     <input type="hidden" name="token" value="{{ permission[1] }}">
 
-                    {% if user_permission[14] %}
+                    {% if user_permission[14] or user_permission[32]%}
                         <div class="bg-base-200 p-4 rounded-lg">
                             <div class="text-sm opacity-70 mb-1">Modification des noms d'utilisateurs : </div>
                             <div class="font-semibold">
@@ -59,7 +59,7 @@
                         </div>
                     {% endif %}
 
-                    {% if user_permission[15] %}
+                    {% if user_permission[15] or user_permission[32] %}
                         <div class="bg-base-200 p-4 rounded-lg">
                             <div class="text-sm opacity-70 mb-1">Modification des mots de passes :</div>
                             <div class="font-semibold">
@@ -75,7 +75,7 @@
                         </div>
                     {% endif %}
 
-                    {% if user_permission[16] %}
+                    {% if user_permission[16] or user_permission[32] %}
                         <div class="bg-base-200 p-4 rounded-lg">
                             <div class="text-sm opacity-70 mb-1">Modification des addresses emails :</div>
                             <div class="font-semibold">
@@ -91,7 +91,7 @@
                         </div>
                     {% endif %}
 
-                    {% if user_permission[17] %}
+                    {% if user_permission[17] or user_permission[32] %}
                         <div class="bg-base-200 p-4 rounded-lg">
                             <div class="text-sm opacity-70 mb-1">Modification des photos de profile :</div>
                             <div class="font-semibold">
@@ -107,7 +107,7 @@
                         </div>
                     {% endif %}
 
-                    {% if user_permission[18] %}
+                    {% if user_permission[18] or user_permission[32] %}
                         <div class="bg-base-200 p-4 rounded-lg">
                             <div class="text-sm opacity-70 mb-1">Modification des authentification à deux facteurs :</div>
                             <div class="font-semibold">
@@ -123,7 +123,7 @@
                         </div>
                     {% endif %}
 
-                    {% if user_permission[14] or user_permission[15] or user_permission[16] or user_permission[17] or user_permission[18] %}
+                    {% if user_permission[14] or user_permission[15] or user_permission[16] or user_permission[17] or user_permission[18] or user_permission[32]%}
                         <div class="card-actions justify-end">
                             <button class="btn btn-primary" onclick="showGlobalPermissionForm()">Modifier les modifications du comptes</button>
                         </div>

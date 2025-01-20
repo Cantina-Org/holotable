@@ -6,11 +6,6 @@ from flask import redirect, url_for, request, render_template
 def add_user_cogs(database):
     # Vérification de si l'utilisateur est bien connecté et n'a pas un compte désactivé
     if verify_login(database) and verify_login(database) != 'desactivated':
-        # Si l'utilisateur n'a pas les permissions, redirection vers la page d'accueil
-        if not database.select("""SELECT create_user FROM cantina_administration.permission WHERE user_token = %s""",
-                               (request.cookies.get('token')), 1)[0]:
-            return redirect(url_for('show_user'))
-
         # On récupère les modules afin de pouvoir faire une redirection sur la page via la sidebar
         modules_info = database.select("""SELECT * FROM cantina_administration.modules""", None)
 
@@ -21,6 +16,9 @@ def add_user_cogs(database):
         # On récupère les permission de l'utilisateur afin de pouvoir afficher les options qui correspondent
         local_user_permission = database.select('''SELECT * FROM cantina_administration.permission 
                     WHERE user_token = %s''', (request.cookies.get('token')), 1)
+
+        if not local_user_permission[19] and not local_user_permission[32]:
+            return redirect(url_for("home"))
 
         if request.method == 'POST':  # Si il fait une requete de type POST
             _create_user = create_user(database)  # Création de l'utilisateur

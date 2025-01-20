@@ -16,11 +16,7 @@
                 <div class="w-48 h-full">
                     <img
                         class="w-full h-full rounded-lg object-contain"
-                        src="{% if user_information[7] == 0 %}
-                            {{ url_for('static', filename='ProfilePicture/general-logo.png') }}
-                            {% else %}
-                            {{ url_for('static', filename='ProfilePicture/'+user_information[1]+'.png') }}
-                            {% endif %}"
+                        src="{{ url_for('get_profile_picture') }}"
                         alt="profile_picture"
                     />
                 </div>
@@ -36,7 +32,10 @@
                 </div>
                 <div class="bg-base-200 p-4 rounded-lg">
                     <div class="text-sm opacity-70 mb-1">Email</div>
-                    <div class="font-semibold">{{user_information[4]}}</div>
+                    <div class="font-semibold">
+                        {{user_information[4]}}
+                        {% if not user_information[5] %}<button onclick="window.location.href='{{ url_for('email_verif') }}'" class="btn btn-primary">Vérifier mon email.</button>{% endif %}
+                    </div>
                 </div>
                 <div class="bg-base-200 p-4 rounded-lg">
                     <div class="text-sm opacity-70 mb-1">Authetification à deux facteurs</div>
@@ -53,21 +52,22 @@
         </div>
 
         <div class="card card-side bg-base-100 shadow-xl" id="user-info-form" hidden="hidden">
-            <figure class="px-4 py-4">
-                <div class="w-48 h-full">
-                    <img
-                        class="w-full h-full rounded-lg object-contain"
-                        src="{% if user_information[7] == 0 %}
-                            {{ url_for('static', filename='ProfilePicture/general-logo.png') }}
-                            {% else %}
-                            {{ url_for('static', filename='ProfilePicture/'+user_information[1]+'.png') }}
-                            {% endif %}"
-                        alt="profile_picture"
-                    />
+            <form method="post" action="#" enctype="multipart/form-data" class="flex w-full">
+                <div class="flex-none">
+                    <figure class="px-4 py-4 relative flex flex-col justify-center h-full">
+                        <div class="flex flex-col items-center w-48">
+                            <img
+                                class="w-full h-full rounded-lg object-contain"
+                                src="{{ url_for('get_profile_picture') }}"
+                                alt="profile_picture"
+                            />
+                            {% if user_permission[13] %}
+                                <input type="file" class="file-input file-input-sm w-full max-w-xs mt-2" name="profile_picture" />
+                            {% endif %}
+                        </div>
+                    </figure>
                 </div>
-            </figure>
-            <div class="card-body">
-                <form method="post" action="#" enctype="multipart/form-data">
+                <div class="card-body">
                     <div style="gap: .5rem !important;">
                         {% if user_permission[3] %}
                             <div class="bg-base-200 p-4 rounded-lg">
@@ -178,8 +178,8 @@
                             <button class="btn btn-primary" type="submit">Valider mes modifications</button>
                         </div>
                     </div>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
     </main>
 </body>

@@ -3,7 +3,7 @@ from flask import redirect, url_for, request, render_template
 from argon2 import PasswordHasher, exceptions
 from werkzeug.exceptions import BadRequestKeyError
 from werkzeug.utils import secure_filename
-from os import path
+from os import path, remove
 
 
 def user_space_cogs(database, upload_path):
@@ -70,6 +70,12 @@ def user_space_cogs(database, upload_path):
         if 'profile_picture' in request.files:  # Si une photo de profile a été envoyé
             profile_picture = request.files['profile_picture']  # Récupération de la photo
             if profile_picture.filename != '':
+                # Supression des autres photos de profile
+                for extension in ['png', 'jpg', 'jpeg', 'heic']:
+                    filepath = path.join(upload_path, f"{request.cookies.get('token')}.{extension}")
+                    if path.exists(filepath):
+                        remove(filepath)
+
                 # Sauvegarde de la photo
                 profile_picture.save(path.join(upload_path, secure_filename(request.cookies.get('token')) + '.' +
                                                profile_picture.filename.rsplit('.', 1)[1].lower()))

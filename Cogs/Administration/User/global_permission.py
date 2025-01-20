@@ -19,10 +19,11 @@ def global_permission_cogs(database):
 
         user_permission = database.select('''SELECT * FROM cantina_administration.permission WHERE user_token = %s''',
                                           (request.cookies.get('token')), number_of_data=1)
-        if request.method == 'POST':
+        if not user_permission[14] and not user_permission[15] and not user_permission[16] and not user_permission[17] and not user_permission[18] and not user_permission[32]:
+            return redirect(url_for('home'))
+
+        if request.method == 'POST': # Si la request est de type "POST" on mets à jour les permission et on affiche les dernières valeurs
             for i in ['edit_username', 'edit_password', 'edit_email', 'edit_profile_picture', 'edit_a2f']:
-                print(check_perm(i))
-                print(i)
                 database.exec(f'''UPDATE cantina_administration.permission SET {i} = %s''', (check_perm(i)))
                 database.exec('''UPDATE cantina_administration.config SET content = %s WHERE name = %s''',
                               (check_perm(i), i))
@@ -33,7 +34,6 @@ def global_permission_cogs(database):
                     database.select('''SELECT content FROM cantina_administration.config WHERE name = %s''',
                                     (i,), number_of_data=1)[0])
 
-                print(permission)
 
         return render_template('Administration/global_permission.html', permission=permission,
                                user_permission=user_permission, modules_info=modules_info, local_user_theme=local_user_theme)
